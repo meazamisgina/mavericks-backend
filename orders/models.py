@@ -12,7 +12,7 @@ STATUS_CHOICES = [
 
 class Order(models.Model):
     order_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    buyer = models.ForeignKey(AppUser, on_delete=models.CASCADE, related_name='orders')
+    buyer = models.ForeignKey(AppUser, on_delete=models.CASCADE, related_name='orders', null=True, blank=True)
     product = models.ForeignKey(CartItem, on_delete=models.CASCADE, null=True, blank=True)
     quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
     status = models.CharField(max_length=20, default='pending', choices=STATUS_CHOICES)
