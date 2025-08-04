@@ -82,7 +82,7 @@ class AppUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AppUser
-        fields = ['user', 'name', 'phone', 'user_type']
+        fields = ['user','id', 'name', 'phone', 'user_type']
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
