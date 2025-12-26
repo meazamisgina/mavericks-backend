@@ -22,3 +22,13 @@ ngrok-stable-linux-amd64.zip
 ngrok
 staticfiles
 
+
+env/
+venv/
+__pycache__/
+*.pyc
+db.sqlite3
+.env
+media/
+vector_db/
+

@@ -1,39 +1,42 @@
 from django.db import models
-from django.core.exceptions import ValidationError
+from django.contrib.auth.models import AbstractUser
+from django.utils.translation import gettext_lazy as _
 import uuid
-from django.contrib.auth.models import User as AuthUser
 
-class AppUser(models.Model): 
-   USER_TYPE_CHOICES = [
-       ('Buyer', 'Buyer'),
-       ('Seller', 'Seller'),
-   ]
+class AppUser(AbstractUser):
+    """
+    Custom user model that serves as the single source of truth for users.
+    It inherits from Django's AbstractUser, gaining all standard auth fields,
+    and adds specific fields for this application like user_type and phone.
+    """
+    class UserType(models.TextChoices):
+        BUYER = 'Buyer', _('Buyer')
+        SELLER = 'Seller', _('Seller')
 
-   id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-   user = models.OneToOneField(AuthUser, on_delete=models.CASCADE, related_name='appuser_profile') 
-   name = models.CharField(max_length=100)
-   email = models.EmailField(max_length=100, unique=True, null=True, blank=True) 
-   phone = models.CharField(max_length=15, unique=True, null=True, blank=True) 
-   user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES)
-   created_at = models.DateTimeField(auto_now_add=True)
-   updated_at = models.DateTimeField(auto_now=True)
+    # Use UUID as the primary key for better security and scalability.
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
+    # Inherits username, first_name, last_name, password, is_staff, etc.
+    # from AbstractUser.
 
-   def clean(self):
-       if not self.email and not self.phone:
-           raise ValidationError("Either email or phone must be provided for AppUser.")
-       if self.phone and AppUser.objects.filter(phone=self.phone).exclude(pk=self.pk).exists():
-           raise ValidationError({"phone": "This phone number is already registered."})
+    # Override email to be unique and serve as the main identifier for login.
+    email = models.EmailField(_('email address'), unique=True)
+    phone = models.CharField(max_length=15, unique=True, null=True, blank=True)
+    user_type = models.CharField(
+        max_length=10,
+        choices=UserType.choices,
+        default=UserType.BUYER,
+        help_text="Designates the user's role in the application."
+    )
 
+    # Use 'email' for authentication instead of 'username'.
+    USERNAME_FIELD = 'email'
+    
+    # A list of the field names that will be prompted for when creating a user
+    # via the `createsuperuser` management command. 'username' is required
+    # here because it's not the USERNAME_FIELD but is still a required field
+    # on the base AbstractUser model.
+    REQUIRED_FIELDS = ['username']
 
-   class Meta:
-       constraints = [
-           models.CheckConstraint(
-               check=models.Q(email__isnull=False) | models.Q(phone__isnull=False),
-               name='appuser_email_or_phone_check'
-           ),
-       ]
-
-   def __str__(self):
-       return self.name or self.user.username
-
+    def __str__(self):
+        return self.email

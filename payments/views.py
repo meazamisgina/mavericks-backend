@@ -27,10 +27,8 @@ class InitiateSTKPushView(APIView):
             description = serializer.validated_data.get('description', 'Payment for Goods/Services')
 
             try:
-                app_user_instance = request.user.appuser_profile
-
                 mpesa_transaction = MpesaSTKPush.objects.create(
-                    user=app_user_instance,
+                    user=request.user, # FIX: request.user is the AppUser instance
                     phone_number=phone_number,
                     amount=amount,
                     reference=reference,
@@ -137,4 +135,3 @@ def mpesa_callback(request):
     except Exception as e:
         logger.error(f"Error processing M-Pesa callback: {e}", exc_info=True)
         return Response({"ResultCode": 1, "ResultDesc": f"Error processing callback: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
-

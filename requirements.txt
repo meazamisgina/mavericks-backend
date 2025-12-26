@@ -94,7 +94,7 @@ pillow==11.2.1
 prompt-toolkit==3.0.51
 propcache==0.3.2
 psycopg==3.2.9
-psycopg-binary==3.2.9
+psycopg-binary
 pycparser==2.22
 pyjwt==2.9.0
 python-dateutil==2.9.0.post0

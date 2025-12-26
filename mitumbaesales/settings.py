@@ -26,8 +26,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+# SECURITY WARNING: don't run with debug turned on in production!SS
+
+DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 
@@ -46,7 +47,6 @@ INSTALLED_APPS = [
     'cart',    
     'authentication',
     'product',
-    'offer',
     'reviews',
     'orders',
     'rest_framework',
@@ -76,13 +76,13 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     
 ]
 
@@ -112,14 +112,26 @@ WSGI_APPLICATION = 'mitumbaesales.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {"default": dj_database_url.config(default=os.getenv("DATABASE_URL"))}
-if not os.getenv("DATABASE_URL"):
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
+# DATABASES = {"default": dj_database_url.config(default=os.getenv("DATABASE_URL"))}
+# if not os.getenv("DATABASE_URL"):
+#     DATABASES = {
+#         "default": {
+#             "ENGINE": "django.db.backends.sqlite3",
+#             "NAME": BASE_DIR / "db.sqlite3",
+#         }
+#     }
+
+import dj_database_url
+import os
+
+# This looks for 'DATABASE_URL' in your environment. 
+# If it doesn't find it (like on your laptop), it uses SQLite.
+DATABASES = {
+    'default': dj_database_url.config(
+        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
+        conn_max_age=600
+    )
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -162,7 +174,20 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Tell Django to use your custom user model for authentication
+AUTH_USER_MODEL = 'authentication.AppUser'
 
+
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': [
+#         'rest_framework.authentication.TokenAuthentication',
+#         'rest_framework.authentication.SessionAuthentication',
+#     ],
+#     'DEFAULT_PERMISSION_CLASSES': [
+#         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+#     ]
+# }
+# --- Find and replace your existing REST_FRAMEWORK block ---
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
@@ -170,8 +195,13 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
-    ]
+    ],
+    # This is the fix for clean error messages on the frontend
+    'EXCEPTION_HANDLER': 'api.exceptions.custom_exception_handler', 
 }
+
+# Add this at the bottom to make the key available in your code
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
 
 AUTHENTICATION_BACKENDS = [
@@ -192,12 +222,3 @@ MPESA_AUTH_URL_SANDBOX = os.getenv('MPESA_AUTH_URL_SANDBOX')
 MPESA_STK_PUSH_URL_SANDBOX = os.getenv('MPESA_STK_PUSH_URL_SANDBOX')
 MPESA_QUERY_URL_SANDBOX = os.getenv('MPESA_QUERY_URL_SANDBOX')
 MPESA_USE_SANDBOX = os.getenv('MPESA_USE_SANDBOX')  
-
-
-
-
-
-
-
-
-
