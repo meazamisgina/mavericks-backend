@@ -29,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: don't run with debug turned on in production!SS
 
 DEBUG = True
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', '.hf.space']
 
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
@@ -85,6 +85,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     
 ]
+X_FRAME_OPTIONS = 'ALLOWALL'
 
 CORS_ALLOW_ALL_ORIGINS = True
 
